@@ -7,6 +7,8 @@ app.set("view engine", "ejs")
 app.use(express.urlencoded({extended:true}))
 
 let userarray = []
+let todoarray = []
+let message;
 app.get("/",(request, response)=>{
 //   response.send("Welcome to your Node class")
 // console.log(__dirname);
@@ -29,6 +31,31 @@ app.get("/user", (req, res)=>{
 
 app.get("/login",(req,res)=>{
   res.render("login")
+})
+
+app.get("/todo",(req, res)=>{
+  res.render("todo",{name:"Tola",todoarray})
+})
+
+
+app.post("/todo",(req, res)=>{
+   console.log(req.body);
+   const {title, content} = req.body
+   if (!title || !content) {
+       message = "Input fields are mandatory"
+       res.redirect("/todo")
+   }else{
+       todoarray.push(req.body)
+       res.redirect("/todo")
+   }
+})
+
+
+app.post("/todo/delete/:index",(req, res)=>{
+  console.log(req.params);
+  const {index} = req.params
+  todoarray.splice(index,1)
+  res.redirect("/todo")
 })
 
 app.post("/user/signup",(req, res)=>{
