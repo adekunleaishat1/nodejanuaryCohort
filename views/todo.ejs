@@ -23,7 +23,7 @@
          <form action="/todo/delete/<%= index %>" method="post">
             <button class="btn btn-danger">Delete</button>
          </form>
-         <button class="btn btn-success">Edit</button>
+         <form action="/edit/todo/<%= index %>" method="get"><button class="btn btn-success">Edit</button></form>
     <% }) %>
 </body>
 </html>

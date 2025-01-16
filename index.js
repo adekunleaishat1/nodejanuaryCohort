@@ -1,10 +1,20 @@
 const express = require("express")
 const app = express()
  const ejs =  require("ejs")
+ const mongoose = require("mongoose")
 
 // middlewares
 app.set("view engine", "ejs")
 app.use(express.urlencoded({extended:true}))
+
+
+const userschema = mongoose.Schema({
+   username:{type:String},
+   email:{type:String},
+   password:{type:String}
+})
+
+ const usermodel = mongoose.model("User_collection", userschema )
 
 let userarray = []
 let todoarray = []
@@ -58,12 +68,20 @@ app.post("/todo/delete/:index",(req, res)=>{
   res.redirect("/todo")
 })
 
-app.post("/user/signup",(req, res)=>{
-   console.log(req.body);
-  userarray.push(req.body)
-   console.log(userarray);
-   res.redirect("/login")
-   
+app.post("/user/signup", async(req, res)=>{
+  try {
+    console.log(req.body);
+    const user =  await usermodel.create(req.body)
+    if (user) {
+      console.log("A user created successfully"); 
+      res.redirect("/login")
+    }else{
+     res.redirect("/signup")
+    }
+  } catch (error) {
+    console.log(error);
+    
+  }
 })
 
 app.post("/user/login",(req,res)=>{
@@ -79,6 +97,42 @@ app.post("/user/login",(req,res)=>{
   res.redirect("/login")
  }
 })
+
+app.get("/edit/todo/:index", (req,res)=>{
+  const { index } = req.params
+  console.log(todoarray[index]);
+  
+  const alltodo = todoarray[index]
+  res.render('edit',{alltodo,index})
+})
+
+app.post("/todo/edit/:index", (req,res)=>{
+  const { index } = req.params
+  const {title,content} = req.body
+  console.log(req.body);
+  if (todoarray[index]){
+    todoarray[index] = {title,content}
+  }
+  res.redirect("/todo")
+})
+
+
+const URI = "mongodb+srv://aishatadekunle877:aishat@cluster0.t92x8pf.mongodb.net/januaryclass?retryWrites=true&w=majority&appName=Cluster0"
+
+
+const connect = async () =>{
+  try {
+   const connected = await mongoose.connect(URI)
+   if (connected) {
+    console.log("database connected successfully");
+    
+   }
+  } catch (error) {
+    console.log(error);
+    
+  }
+}
+connect()
 
 const port = 5000
 app.listen(port,()=>{
