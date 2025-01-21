@@ -8,6 +8,10 @@
     <title>Document</title>
 </head>
 <body>
+    <% if (message) { %>
+        <p class="alert alert-danger w-50 mx-auto"><%= message %></p>
+    <% } %>
+ 
     <form class="w-50 mx-auto px-3 py-3 shadow" action="/user/login" method="post">
         <h1 class="text-center text-muted">Login</h1>
         <input class="form-control mt-3" type="email" name="email" placeholder="email">
