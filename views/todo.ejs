@@ -20,10 +20,10 @@
     <% todoarray.forEach((element, index) => { %>
          <p><%= element.title %></p>
          <p><%= element.content %></p>
-         <form action="/todo/delete/<%= index %>" method="post">
+         <form action="/todo/delete/<%= element._id %>" method="post">
             <button class="btn btn-danger">Delete</button>
          </form>
-         <form action="/edit/todo/<%= index %>" method="get"><button class="btn btn-success">Edit</button></form>
+         <form action="/edit/todo/<%= element._id %>" method="get"><button class="btn btn-success">Edit</button></form>
     <% }) %>
 </body>
 </html>
