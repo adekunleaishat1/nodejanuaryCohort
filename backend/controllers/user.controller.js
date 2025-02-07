@@ -1,6 +1,8 @@
 const usermodel = require("../models/user.model")
 const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
+const cloudinary = require("../Utils/cloudinary")
+const Verifytoken = require("../session/sessionservice")
 
 const Registeruser = async(req, res) =>{
     try {
@@ -39,7 +41,7 @@ const Loginuser = async(req, res) =>{
       const comparepasword = await bcrypt.compare(password, user.password)
       console.log(comparepasword);
       if (comparepasword) {
-      const token = await  jwt.sign({email},secretkey,{expiresIn:"1d"})
+      const token = await  jwt.sign({email},secretkey,{expiresIn:10})
       console.log(token);
        return res.status(200).send({message:"Login successful", status:true, token})
       }
@@ -47,6 +49,7 @@ const Loginuser = async(req, res) =>{
       res.status(401).send({message:"Invalid credentials", status:false})
      }
    } catch (error) {
+    
      res.status(500).send({message:error.message, status:false})
    }
 }
@@ -55,10 +58,10 @@ const VerifyToken = async (req, res) =>{
   try {
     const token = req.headers.authorization.split(" ")[1]
     console.log(token);
-    const verifyuser = await jwt.verify(token, secretkey)
-    console.log(verifyuser);
-    if (verifyuser) {
-      const user =   await usermodel.findOne({email:verifyuser.email})
+    const email = await Verifytoken(token)
+    console.log(email);
+    if (email) {
+      const user =   await usermodel.findOne({email:email})
       if (user) {
         return res.status(200).send({message:"User verified", status:true,user})
       }
@@ -66,9 +69,39 @@ const VerifyToken = async (req, res) =>{
       res.status(400).send({message:"Invalid token", status:false})
     }
   } catch (error) {
+    console.log(error.message);
     res.status(500).send({message:error.message, status:false})
   }
 }
 
 
-module.exports = {Registeruser, Loginuser, VerifyToken}
+const UploadProfile = async (req, res) =>{
+   try {
+    const {image } = req.body
+    const token = req.headers.authorization.split(" ")[1]
+    console.log(token);
+    const verifyuser = await jwt.verify(token, secretkey)
+    if (!verifyuser) {
+      res.status(400).send({message:"Invalid user",status:false })
+    }else{
+      const imageupload =  await cloudinary.uploader.upload(image)
+      console.log(imageupload.secure_url);
+    const updatedprofile =  await  usermodel.findOneAndUpdate(
+        {email:verifyuser.email},
+        {$set:{profilepicture:imageupload.secure_url}},
+        {new:true}
+      )
+
+      if (updatedprofile) {
+        res.status(200).send({message:"profile updated successfuly", status:true})
+      }
+  
+      
+    }
+    
+   } catch (error) {
+     res.status(500).send({message:error.message, status:false})
+   }
+}
+
+module.exports = {Registeruser, Loginuser, VerifyToken, UploadProfile}
