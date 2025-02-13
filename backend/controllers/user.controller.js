@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
 const cloudinary = require("../Utils/cloudinary")
 const Verifytoken = require("../session/sessionservice")
+const productmodel = require("../models/product.model")
 
 const Registeruser = async(req, res) =>{
     try {
@@ -41,7 +42,7 @@ const Loginuser = async(req, res) =>{
       const comparepasword = await bcrypt.compare(password, user.password)
       console.log(comparepasword);
       if (comparepasword) {
-      const token = await  jwt.sign({email},secretkey,{expiresIn:10})
+      const token = await  jwt.sign({email},secretkey,{expiresIn:"1d"})
       console.log(token);
        return res.status(200).send({message:"Login successful", status:true, token})
       }
@@ -104,4 +105,27 @@ const UploadProfile = async (req, res) =>{
    }
 }
 
-module.exports = {Registeruser, Loginuser, VerifyToken, UploadProfile}
+const productUpload = async (req, res) => {
+try {
+  const {productname, productprice, productimage} = req.body
+
+const images = await Promise.all(productimage.map(async (image) => {
+  const cloudimages = await cloudinary.uploader.upload(image)
+return cloudimages.secure_url
+})) 
+
+const createdproduct = await productmodel.create({
+  Productname:productname,
+  Productprice:productprice,
+  Productimage:images
+})
+
+console.log(createdproduct);
+
+
+} catch (error) {
+  
+}
+}
+
+module.exports = {Registeruser, Loginuser, VerifyToken, UploadProfile, productUpload}
