@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken")
 const cloudinary = require("../Utils/cloudinary")
 const Verifytoken = require("../session/sessionservice")
 const productmodel = require("../models/product.model")
+const sendmail = require("../Utils/mailer")
 
 const Registeruser = async(req, res) =>{
     try {
@@ -19,7 +20,10 @@ const Registeruser = async(req, res) =>{
             email,
             password:hashedpassword
           })
-          if (createduser) {
+          const sent = await sendmail(email, username)
+          console.log(sent);
+          
+          if (createduser && sent) {
             res.status(200).send({message:"Signup successful", status:true})
           }
         }
@@ -124,7 +128,7 @@ console.log(createdproduct);
 
 
 } catch (error) {
-  
+  res.sta
 }
 }
 
